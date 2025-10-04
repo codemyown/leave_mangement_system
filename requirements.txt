@@ -1,0 +1,12 @@
+asgiref==3.9.2
+channels==4.3.1
+channels_redis==4.3.0
+defusedxml==0.7.1
+Django==5.2.7
+django-unfold==0.67.0
+fonttools==4.60.1
+fpdf2==2.8.4
+msgpack==1.1.1
+Pillow==11.3.0
+redis==6.4.0
+sqlparse==0.5.3
