@@ -9,3 +9,4 @@ django-crispy-forms>=2.1
 python-dotenv>=1.0
 fpdf2>=2.7.1
 django-unfold
+whitenoise>=6.4.0
