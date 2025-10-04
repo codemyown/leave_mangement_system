@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login ,logout
 from django.contrib.auth.decorators import login_required
-from .models import LeaveRequest, LeaveBalance
+from .models import LeaveRequest, LeaveBalance , Holiday
+from datetime import timedelta
 from .helpers import get_working_days, get_active_managers
 from .decorators import employee_required
 from .forms import LeaveRequestForm
@@ -124,3 +125,30 @@ def leave_history_view(request):
     leaves = LeaveRequest.objects.filter(user=request.user).order_by('-start_date')
     balances = LeaveBalance.objects.filter(user=request.user)
     return render(request, 'accounts/leave_history.html', {'leaves': leaves, 'balances': balances, 'today': date.today()})
+
+@login_required
+def holiday_calendar_view(request):
+    """
+    Renders a calendar view of upcoming holidays for the next 30 days.
+
+    Fetches all holidays within the next 30 days from today and maps each date 
+    to its holiday name for display in the template.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: Renders 'holiday_calendar.html' template with context 
+        containing 'month_days' (list of dates for the next 30 days) and 
+        'holiday_dates' (dict mapping holiday dates to names).
+    """
+    today = date.today()
+    month_days = [today + timedelta(days=i) for i in range(30)]
+    holidays = Holiday.objects.filter(date__range=[today, today + timedelta(days=30)])
+    holiday_dates = {h.date: h.name for h in holidays}
+
+    context = {
+        'month_days': month_days,
+        'holiday_dates': holiday_dates
+    }
+    return render(request, 'accounts/holiday_calendar.html', context)
