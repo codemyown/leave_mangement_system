@@ -1,0 +1,355 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<style>
+    .reports-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .page-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .page-header h2 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .page-header p {
+        color: #6c757d;
+        font-size: 1rem;
+        margin: 0;
+    }
+    
+    .back-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-btn:hover {
+        background: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+    
+    .section-header {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .report-card {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        margin-bottom: 3rem;
+        overflow: hidden;
+    }
+    
+    .card-body-custom {
+        padding: 1.5rem;
+    }
+    
+    .report-table {
+        margin: 0;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+    
+    .report-table thead th {
+        background: #34495e;
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .report-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        color: #495057;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .report-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .calendar-table {
+        margin: 0;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+    
+    .calendar-table thead th {
+        background: #34495e;
+        color: white;
+        font-weight: 500;
+        padding: 0.875rem 0.5rem;
+        border: 1px solid #2c3e50;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+    }
+    
+    .calendar-table tbody td {
+        padding: 0.75rem 0.5rem;
+        vertical-align: top;
+        border: 1px solid #dee2e6;
+        min-width: 90px;
+        background: white;
+        text-align: center;
+    }
+    
+    .day-header {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+    
+    .holiday-badge {
+        background: #dc3545;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-block;
+        margin-top: 0.25rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .user-badge {
+        background: #2c3e50;
+        color: white;
+        padding: 0.35rem 0.7rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 0.4rem;
+        text-align: center;
+    }
+    
+    .user-badge:last-child {
+        margin-bottom: 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #6c757d;
+    }
+    
+    .no-data {
+        color: #adb5bd;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        .reports-container {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .back-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .card-body-custom {
+            padding: 1rem;
+        }
+        
+        .report-table,
+        .calendar-table {
+            font-size: 0.8rem;
+        }
+        
+        .report-table thead th,
+        .report-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .calendar-table thead th,
+        .calendar-table tbody td {
+            padding: 0.5rem 0.25rem;
+            min-width: 70px;
+            font-size: 0.7rem;
+        }
+        
+        .day-header {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<div class="reports-container">
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h2>Leave Reports & Analytics</h2>
+                <p>Comprehensive leave analytics and upcoming schedules</p>
+            </div>
+            <a href="{% url 'manager_dashboard' %}" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <!-- All Approved Leaves Details -->
+        <h3 class="section-header">All Approved Leaves</h3>
+        <div class="report-card">
+            <div class="card-body-custom">
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Leave Type</th>
+                                <th>From Date</th>
+                                <th>To Date</th>
+                                <th>Reason</th>
+                                <th>Comments</th>
+                                <th>Approved By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in all_approved_leaves %}
+                            <tr>
+                                <td><strong>{{ leave.user.username }}</strong></td>
+                                <td>{{ leave.user.department|default:"—" }}</td>
+                                <td>{{ leave.leave_type.name }}</td>
+                                <td>{{ leave.start_date|date:"d M Y" }}</td>
+                                <td>{{ leave.end_date|date:"d M Y" }}</td>
+                                <td>{{ leave.reason|truncatewords:10 }}</td>
+                                <td>{{ leave.comments|default:"—"|truncatewords:10 }}</td>
+                                <td>{{ leave.approver.username|default:"—" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="empty-state">No approved leaves found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department-wise Leave Summary -->
+        <h3 class="section-header">Department-wise Leave Summary</h3>
+        <div class="report-card">
+            <div class="card-body-custom">
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Leave Type</th>
+                                <th>Total Approved Leaves</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in dept_leave_data %}
+                            <tr>
+                                <td>{{ row.user__department|default:"—" }}</td>
+                                <td>{{ row.leave_type__name }}</td>
+                                <td><strong>{{ row.total }}</strong></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="empty-state">No approved leaves found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Leaves Calendar -->
+        <h3 class="section-header">Upcoming Leaves & Holidays (Next 30 Days)</h3>
+        <div class="report-card">
+            <div class="card-body-custom">
+                <div class="table-responsive">
+                    <table class="table calendar-table">
+                        <thead>
+                            <tr>
+                                {% for day in month_days %}
+                                    <th>
+                                        {{ day|date:"D" }}<br>
+                                        {{ day|date:"d M" }}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                {% for day in month_days %}
+                                    <td>
+                                        {% if day in holiday_dates %}
+                                            <span class="holiday-badge">{{ holiday_dates.day }}</span>
+                                        {% endif %}
+                                        
+                                        {% if day in calendar_map %}
+                                            {% for user in calendar_map.day %}
+                                                <span class="user-badge">{{ user }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                        {% if day not in holiday_dates and day not in calendar_map %}
+                                            <span class="no-data">—</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
