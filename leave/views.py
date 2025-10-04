@@ -8,6 +8,7 @@ from .forms import LeaveRequestForm
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
+from datetime import date
 
 def login_view(request):
     """
