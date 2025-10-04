@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from datetime import date
 from fpdf import FPDF
+from django.http import HttpResponse
 
 def login_view(request):
     """
