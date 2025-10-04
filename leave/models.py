@@ -103,3 +103,22 @@ class LeaveRequest(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.leave_type.name} ({self.status})"
+
+
+class Delegation(models.Model):
+    """
+    Model representing a delegation of manager's authority to another user.
+
+    Attributes:
+        manager (User): Manager who delegates authority.
+        delegate (User): User receiving the delegated authority.
+        start_date (DateField): Start date of the delegation.
+        end_date (DateField): End date of the delegation.
+    """
+    manager = models.ForeignKey(User, on_delete=models.CASCADE, related_name='delegations_given')
+    delegate = models.ForeignKey(User, on_delete=models.CASCADE, related_name='delegations_received')
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    def __str__(self):
+        return f"{self.manager.username} → {self.delegate.username} ({self.start_date} to {self.end_date})"
