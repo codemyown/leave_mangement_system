@@ -12,6 +12,8 @@ from django.contrib import messages
 from datetime import date
 from fpdf import FPDF
 from django.http import HttpResponse
+from django.db.models import Count
+
 
 def login_view(request):
     """
