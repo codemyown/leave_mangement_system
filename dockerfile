@@ -15,9 +15,11 @@ COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy project
+# Copy project AFTER installing dependencies
 COPY . .
 
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000
