@@ -48,3 +48,18 @@ class LeaveBalance(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.leave_type.name}: {self.balance}"
+
+
+class Holiday(models.Model):
+    """
+    Model representing a holiday.
+
+    Attributes:
+        date (DateField): Unique date of the holiday.
+        name (str): Name/description of the holiday.
+    """
+    date = models.DateField(unique=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"
