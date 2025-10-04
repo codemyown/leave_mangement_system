@@ -204,6 +204,70 @@ def download_leave_history_pdf(request):
     return response
 
 
+
+@login_required
+@employee_required
+def cancel_leave_view(request, leave_id):
+    """
+    Allow an employee to cancel their leave request.
+
+    Only pending or approved leaves that have not started can be cancelled. 
+    If the leave was approved, the leave balance is restored. 
+    All active managers are notified via email about the cancellation.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        leave_id (int): ID of the leave request to cancel.
+
+    Returns:
+        HttpResponse: Redirects to leave history with a success or error message, 
+                      or renders the cancellation modal for confirmation.
+    """
+    leave = LeaveRequest.objects.get(id=leave_id, user=request.user)
+    
+    # Only allow cancellation of pending or approved leaves
+    if leave.status not in ['Pending', 'Approved']:
+        messages.error(request, 'This leave request cannot be cancelled.')
+        return redirect('leave_history')
+    
+    # Check if leave has already started
+    if leave.start_date <= date.today():
+        messages.error(request, 'Cannot cancel leave that has already started.')
+        return redirect('leave_history')
+    
+    if request.method == 'POST':
+        reason = request.POST.get('cancel_reason', '')
+        
+        # If approved leave, restore balance
+        if leave.status == 'Approved':
+            working_days = get_working_days(leave.start_date, leave.end_date)
+            total_days = len(working_days)
+            balance = LeaveBalance.objects.get(user=request.user, leave_type=leave.leave_type)
+            balance.balance += total_days
+            balance.save()
+        
+        # Update leave status
+        leave.status = 'Cancelled'
+        leave.comments = f"Cancelled by employee. Reason: {reason}"
+        leave.save()
+        
+        # UPDATED: Notify active managers (considering delegation)
+        active_managers = get_active_managers()
+        for manager in active_managers:
+            send_mail(
+                subject=f"Leave Cancelled by {request.user.username}",
+                message=f"{request.user.username} cancelled their {leave.leave_type.name} leave from {leave.start_date} to {leave.end_date}.\nReason: {reason}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[manager.email],
+            )
+        
+        messages.success(request, 'Leave request cancelled successfully.')
+        return redirect('leave_history')
+    
+    return render(request, 'accounts/cancel_leave_modal.html', {'leave': leave})
+
+
+
 # Additional views for manager functionalities can be added here.
 
 @login_required
