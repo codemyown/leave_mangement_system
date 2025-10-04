@@ -286,3 +286,51 @@ def approve_leave_view(request, leave_id):
         return redirect('manager_dashboard')
     
     return render(request, 'accounts/approve_leave_modal.html', {'leave': leave})
+
+@login_required
+@manager_required
+def reject_leave_view(request, leave_id):
+    """
+    View for managers to reject a leave request.
+
+    Args:
+        request: The HTTP request object.
+        leave_id: ID of the leave request to reject.
+
+    Workflow:
+    1. Checks if the current user is authorized to reject the leave (direct or delegated manager).
+    2. On POST:
+       - Updates leave status to 'Rejected'.
+       - Adds manager comments.
+       - Sends email notification to the employee.
+       - Shows a success message and redirects to manager dashboard.
+    3. On GET:
+       - Renders the rejection modal/template.
+    """
+    leave = LeaveRequest.objects.get(id=leave_id)
+    
+    # Check if current manager can reject (direct or delegated)
+    active_managers = get_active_managers(leave.start_date)
+    if request.user not in active_managers:
+        messages.error(request, 'You are not authorized to reject this leave.')
+        return redirect('manager_dashboard')
+    
+    if request.method == 'POST':
+        comments = request.POST.get('comments', '')
+        leave.status = 'Rejected'
+        leave.approver = request.user
+        leave.comments = comments
+        leave.save()
+
+        # Send email
+        send_mail(
+            subject=f"Your Leave Request Rejected",
+            message=f"Your leave from {leave.start_date} to {leave.end_date} has been rejected by {request.user.username}.\nReason: {comments}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[leave.user.email],
+        )
+
+        messages.error(request, f'Leave request by {leave.user.username} rejected.')
+        return redirect('manager_dashboard')
+    
+    return render(request, 'accounts/reject_leave_modal.html', {'leave': leave})
