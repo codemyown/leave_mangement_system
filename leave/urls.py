@@ -12,6 +12,7 @@ urlpatterns = [
    path('leave-history/', views.leave_history_view, name='leave_history'),
    path('upcoming-holidays/', views.holiday_calendar_view, name='upcoming_holidays'),
    path('leave-history/download/', views.download_leave_history_pdf, name='download_leave_history_pdf'),
+   path('cancel-leave/<int:leave_id>/', views.cancel_leave_view, name='cancel_leave'),
 
    # Manager-specific views can be added here
    path('manager-dashboard/', views.manager_dashboard_view, name='manager_dashboard'),

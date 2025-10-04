@@ -58,6 +58,8 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+# Employee-specific views
+
 @login_required
 @employee_required
 def apply_leave_view(request):
