@@ -63,3 +63,43 @@ class Holiday(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.date})"
+
+
+class LeaveRequest(models.Model):
+    """
+    Model representing a leave request made by a user.
+
+    Attributes:
+        STATUS_CHOICES (tuple): Possible statuses for a leave request.
+        user (User): User requesting the leave.
+        leave_type (LeaveType): Type of leave requested.
+        start_date (DateField): Start date of the leave.
+        end_date (DateField): End date of the leave.
+        reason (TextField): Reason for the leave.
+        status (str): Current status of the leave request (default 'Pending').
+        approver (User): Manager or approver of the leave (optional).
+        comments (TextField): Additional comments from approver (optional).
+    """
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'), 
+        ('Approved', 'Approved'), 
+        ('Rejected', 'Rejected'),
+        ('Cancelled', 'Cancelled')
+    )
+
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    leave_type = models.ForeignKey('LeaveType', on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    approver = models.ForeignKey('User', related_name='approver', on_delete=models.SET_NULL, null=True, blank=True)
+    comments = models.TextField(blank=True, null=True)
+
+    @property
+    def total_days(self):
+        """Calculate total number of leave days including start and end date."""
+        return (self.end_date - self.start_date).days + 1
+
+    def __str__(self):
+        return f"{self.user.username} - {self.leave_type.name} ({self.status})"
