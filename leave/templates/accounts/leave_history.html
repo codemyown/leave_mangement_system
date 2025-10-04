@@ -1,0 +1,569 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .history-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .page-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .page-header h2 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .download-btn {
+        background: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .download-btn:hover {
+        background: #34495e;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+    }
+    
+    .balance-card {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .card-header-custom {
+        background: #2c3e50;
+        color: white;
+        padding: 1.25rem 1.5rem;
+        border-bottom: none;
+    }
+    
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .balance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .balance-item {
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 1.25rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .balance-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #2c3e50;
+    }
+    
+    .balance-type {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .balance-days {
+        color: #6c757d;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .balance-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    
+    .history-table-card {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .table-responsive {
+        padding: 1.5rem;
+    }
+    
+    .history-table {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+    
+    .history-table thead th {
+        background: #34495e;
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .history-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        color: #495057;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .history-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .history-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-block;
+    }
+    
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-cancelled {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .comment-text {
+        max-width: 250px;
+        word-wrap: break-word;
+    }
+    
+    .cancel-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.35rem 0.7rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .cancel-btn:hover {
+        background: #c82333;
+    }
+    
+    .cancel-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    .view-comment-btn {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 0.35rem 0.7rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .view-comment-btn:hover {
+        background: #138496;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s;
+    }
+    
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s;
+    }
+    
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h5 {
+        margin: 0;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+    }
+    
+    .close-btn:hover {
+        color: #2c3e50;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .comment-box {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 4px solid #2c3e50;
+    }
+    
+    .comment-meta {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .comment-meta strong {
+        color: #2c3e50;
+    }
+    
+    .comment-content {
+        color: #495057;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .history-container {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .download-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .balance-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .table-responsive {
+            padding: 1rem;
+        }
+        
+        .history-table {
+            font-size: 0.85rem;
+        }
+        
+        .history-table thead th,
+        .history-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .comment-text {
+            max-width: 150px;
+        }
+        
+        .modal-content {
+            width: 95%;
+            margin: 1rem;
+        }
+    }
+</style>
+
+<div class="history-container">
+    <div class="container">
+        <div class="page-header">
+            <h2>Leave History</h2>
+            <a href="{% url 'download_leave_history_pdf' %}" class="download-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download PDF
+            </a>
+        </div>
+
+        <!-- Leave Balances -->
+        <div class="balance-card">
+            <div class="card-header-custom">
+                <h5>Leave Balances</h5>
+            </div>
+            <div class="balance-grid">
+                {% for bal in balances %}
+                <div class="balance-item">
+                    <span class="balance-type">{{ bal.leave_type.name }}</span>
+                    <div class="balance-days">{{ bal.balance }}</div>
+                    <div class="balance-label">days remaining</div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <p>No leave balances found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Leave Requests Table -->
+        <div class="history-table-card">
+            <div class="card-header-custom">
+                <h5>Leave Requests</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Leave Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Working Days</th>
+                            <th>Status</th>
+                            <th>Approver</th>
+                            <th>Reason</th>
+                            <th>Manager Comments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in leaves %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ leave.leave_type.name }}</td>
+                            <td>{{ leave.start_date }}</td>
+                            <td>{{ leave.end_date }}</td>
+                            <td>{{ leave.total_days|add:"0" }}</td>
+                            <td>
+                                {% if leave.status == 'Approved' %}
+                                    <span class="status-badge status-approved">{{ leave.status }}</span>
+                                {% elif leave.status == 'Rejected' %}
+                                    <span class="status-badge status-rejected">{{ leave.status }}</span>
+                                {% elif leave.status == 'Cancelled' %}
+                                    <span class="status-badge status-cancelled">{{ leave.status }}</span>
+                                {% else %}
+                                    <span class="status-badge status-pending">{{ leave.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if leave.approver %}
+                                    {{ leave.approver.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>{{ leave.reason }}</td>
+                            <td>
+                                {% if leave.comments %}
+                                    <button class="view-comment-btn" onclick="viewComment('{{ leave.approver.username|default:"Manager" }}', '{{ leave.start_date }}', '{{ leave.end_date }}', '{{ leave.comments|escapejs }}')">
+                                        View Comment
+                                    </button>
+                                {% else %}
+                                    <span style="color: #adb5bd;">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if leave.status in 'Pending,Approved' and leave.start_date > today %}
+                                    <button class="cancel-btn" onclick="openCancelModal({{ leave.id }}, '{{ leave.leave_type.name }}', '{{ leave.start_date }}', '{{ leave.end_date }}')">
+                                        Cancel
+                                    </button>
+                                {% else %}
+                                    <span style="color: #adb5bd;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="empty-state">No leave requests found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comment Modal -->
+<div id="commentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Manager Comments</h5>
+            <button class="close-btn" onclick="closeCommentModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="comment-box">
+                <div class="comment-meta" id="commentMeta"></div>
+                <div class="comment-content" id="commentContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Leave Modal -->
+<div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Cancel Leave Request</h5>
+            <button class="close-btn" onclick="closeCancelModal()">&times;</button>
+        </div>
+        <form id="cancelForm" method="POST">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="comment-box" style="border-left-color: #dc3545;">
+                    <div class="comment-meta" id="cancelMeta"></div>
+                    <p style="color: #721c24; margin-top: 1rem;">Are you sure you want to cancel this leave request?</p>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">
+                        Reason for Cancellation <span style="color: #dc3545;">*</span>
+                    </label>
+                    <textarea name="cancel_reason" required placeholder="Please provide a reason for cancelling..." style="width: 100%; padding: 0.75rem; border: 1px solid #d0d0d0; border-radius: 6px; min-height: 100px; resize: vertical;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeCancelModal()">No, Keep It</button>
+                <button type="submit" class="btn-submit reject">Yes, Cancel Leave</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function viewComment(approver, startDate, endDate, comment) {
+    const modal = document.getElementById('commentModal');
+    const commentMeta = document.getElementById('commentMeta');
+    const commentContent = document.getElementById('commentContent');
+    
+    commentMeta.innerHTML = `<strong>By:</strong> ${approver} | <strong>Leave Period:</strong> ${startDate} to ${endDate}`;
+    commentContent.textContent = comment;
+    
+    modal.classList.add('show');
+}
+
+function closeCommentModal() {
+    const modal = document.getElementById('commentModal');
+    modal.classList.remove('show');
+}
+
+function openCancelModal(leaveId, leaveType, startDate, endDate) {
+    const modal = document.getElementById('cancelModal');
+    const cancelForm = document.getElementById('cancelForm');
+    const cancelMeta = document.getElementById('cancelMeta');
+    
+    cancelForm.action = `/cancel-leave/${leaveId}/`;
+    cancelMeta.innerHTML = `<strong>Leave Type:</strong> ${leaveType}<br><strong>Period:</strong> ${startDate} to ${endDate}`;
+    
+    modal.classList.add('show');
+}
+
+function closeCancelModal() {
+    const modal = document.getElementById('cancelModal');
+    modal.classList.remove('show');
+}
+
+window.onclick = function(event) {
+    const commentModal = document.getElementById('commentModal');
+    const cancelModal = document.getElementById('cancelModal');
+    
+    if (event.target === commentModal) {
+        closeCommentModal();
+    }
+    if (event.target === cancelModal) {
+        closeCancelModal();
+    }
+}
+</script>
+{% endblock %}
