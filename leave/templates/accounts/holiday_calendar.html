@@ -1,0 +1,145 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Holiday Calendar{% endblock %}
+
+{% block content %}
+<style>
+    .calendar-container {
+        background: #f8f9fa;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .calendar-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .calendar-header {
+        background: #2c3e50;
+        color: white;
+        padding: 1.5rem;
+        border-bottom: 3px solid #34495e;
+    }
+    
+    .calendar-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .calendar-table {
+        margin: 0;
+    }
+    
+    .calendar-table thead th {
+        background: #34495e;
+        color: white;
+        font-weight: 600;
+        padding: 1rem;
+        border: 1px solid #2c3e50;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .calendar-table tbody td {
+        padding: 1.2rem 0.8rem;
+        vertical-align: middle;
+        border: 1px solid #dee2e6;
+        min-width: 100px;
+        background: white;
+    }
+    
+    .calendar-table tbody td:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .day-number {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .holiday-badge {
+        display: inline-block;
+        background: #dc3545;
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+    }
+    
+    .no-holiday {
+        color: #adb5bd;
+        font-size: 1.2rem;
+        font-weight: 300;
+    }
+    
+    @media (max-width: 768px) {
+        .calendar-container {
+            padding: 1rem;
+        }
+        
+        .calendar-table thead th,
+        .calendar-table tbody td {
+            padding: 0.6rem 0.4rem;
+            font-size: 0.75rem;
+            min-width: 80px;
+        }
+        
+        .day-number {
+            font-size: 0.95rem;
+        }
+        
+        .holiday-badge {
+            font-size: 0.7rem;
+            padding: 0.3rem 0.6rem;
+        }
+    }
+</style>
+
+<div class="container calendar-container">
+    <div class="calendar-card">
+        <div class="calendar-header">
+            <h3>Upcoming Holidays (Next 30 Days)</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table calendar-table text-center mb-0">
+                    <thead>
+                        <tr>
+                            {% for day in month_days %}
+                                <th>{{ day|date:"D" }}<br>{{ day|date:"d M" }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for day in month_days %}
+                                <td>
+                                    <span class="day-number">{{ day|date:"d" }}</span>
+                                    {% if day in holiday_dates %}
+                                        <span class="holiday-badge" title="{{ holiday_dates.day }}">
+                                            {{ holiday_dates.day }}
+                                        </span>
+                                    {% else %}
+                                        <span class="no-holiday">—</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
