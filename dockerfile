@@ -18,10 +18,11 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY . .
 
+# Collect static files (optional, for production)
+RUN python manage.py collectstatic --noinput
+
 # Expose port
 EXPOSE 8000
 
-# Run migrations and start server
-CMD python manage.py makemigrations --noinput && \
-    python manage.py migrate --noinput && \
-    gunicorn leave_project.wsgi:application --bind 0.0.0.0:8000
+# Run server
+CMD ["gunicorn", "leave_project.wsgi:application", "--bind", "0.0.0.0:8000"]
