@@ -31,3 +31,20 @@ class LeaveType(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class LeaveBalance(models.Model):
+    """
+    Model representing the leave balance for a user per leave type.
+
+    Attributes:
+        user (User): Reference to the user.
+        leave_type (LeaveType): Type of leave.
+        balance (int): Number of remaining leave days (default 0).
+    """
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    leave_type = models.ForeignKey('LeaveType', on_delete=models.CASCADE)
+    balance = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.leave_type.name}: {self.balance}"
