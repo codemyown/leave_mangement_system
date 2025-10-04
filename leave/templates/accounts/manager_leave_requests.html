@@ -1,0 +1,559 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Manager Dashboard{% endblock %}
+{% block content %}
+<style>
+  .manager-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+  
+  .page-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .page-header h2 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .header-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .reports-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .reports-btn:hover {
+    background: #138496;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+  }
+  
+  .logout-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .logout-btn:hover {
+    background: #c82333;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+  
+  .dashboard-card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  
+  .card-header-custom {
+    background: #2c3e50;
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border-bottom: none;
+  }
+  
+  .card-header-custom h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .table-container {
+    padding: 1.5rem;
+  }
+  
+  .requests-table {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  .requests-table thead th {
+    background: #34495e;
+    color: white;
+    font-weight: 500;
+    padding: 1rem;
+    border: none;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  
+  .requests-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #495057;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .requests-table tbody tr:hover {
+    background: #f8f9fa;
+  }
+  
+  .requests-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .action-btn {
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    margin: 0 0.25rem;
+    cursor: pointer;
+  }
+  
+  .approve-btn {
+    background: #28a745;
+    color: white;
+  }
+  
+  .approve-btn:hover {
+    background: #218838;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+  }
+  
+  .reject-btn {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .reject-btn:hover {
+    background: #c82333;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s;
+  }
+  
+  .modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s;
+  }
+  
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h5 {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+  }
+  
+  .close-btn:hover {
+    color: #2c3e50;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .leave-details {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+  
+  .leave-details p {
+    margin: 0.5rem 0;
+    color: #495057;
+  }
+  
+  .leave-details strong {
+    color: #2c3e50;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+  }
+  
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .form-group textarea:focus {
+    border-color: #2c3e50;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+  
+  .btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .btn-cancel:hover {
+    background: #5a6268;
+  }
+  
+  .btn-submit {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .btn-submit.approve {
+    background: #28a745;
+    color: white;
+  }
+  
+  .btn-submit.approve:hover {
+    background: #218838;
+  }
+  
+  .btn-submit.reject {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .btn-submit.reject:hover {
+    background: #c82333;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+  
+  .empty-state svg {
+    margin-bottom: 1rem;
+    color: #adb5bd;
+  }
+  
+  .alert {
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: none;
+    font-size: 0.95rem;
+  }
+  
+  .alert-success {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @media (max-width: 768px) {
+    .manager-container {
+      padding: 1rem;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .header-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
+    
+    .reports-btn,
+    .logout-btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .table-container {
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    
+    .requests-table {
+      font-size: 0.85rem;
+    }
+    
+    .requests-table thead th,
+    .requests-table tbody td {
+      padding: 0.75rem 0.5rem;
+    }
+    
+    .action-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      display: block;
+      margin: 0.25rem 0;
+      text-align: center;
+    }
+    
+    .modal-content {
+      width: 95%;
+      margin: 1rem;
+    }
+  }
+</style>
+
+<div class="manager-container">
+  <div class="container">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    
+    <div class="page-header">
+      <h2>Manager Dashboard</h2>
+      <div class="header-buttons">
+        <a href="{% url 'reports' %}" class="reports-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Reports & Analytics
+        </a>
+        <a href="{% url 'logout' %}" class="logout-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Logout
+        </a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header-custom">
+        <h5>Pending Leave Requests</h5>
+      </div>
+      <div class="table-container">
+        {% if pending_leaves %}
+        <div class="table-responsive">
+          <table class="table requests-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Leave Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Total Days</th>
+                <th>Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for leave in pending_leaves %}
+              <tr>
+                <td>{{ leave.user.username }}</td>
+                <td>{{ leave.user.department }}</td>
+                <td>{{ leave.leave_type.name }}</td>
+                <td>{{ leave.start_date }}</td>
+                <td>{{ leave.end_date }}</td>
+                <td>{{ leave.total_days }}</td>
+                <td>{{ leave.reason }}</td>
+                <td>
+                  <button class="action-btn approve-btn" onclick="openModal('approve', {{ leave.id }}, '{{ leave.user.username }}', '{{ leave.leave_type.name }}', '{{ leave.start_date }}', '{{ leave.end_date }}', {{ leave.total_days }})">Approve</button>
+                  <button class="action-btn reject-btn" onclick="openModal('reject', {{ leave.id }}, '{{ leave.user.username }}', '{{ leave.leave_type.name }}', '{{ leave.start_date }}', '{{ leave.end_date }}', {{ leave.total_days }})">Reject</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <p>No pending leave requests at the moment.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="actionModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 id="modalTitle"></h5>
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <form id="modalForm" method="POST">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="leave-details" id="leaveDetails"></div>
+        <div class="form-group">
+          <label for="comments">Comments <span style="color: #dc3545;">*</span></label>
+          <textarea id="comments" name="comments" required placeholder="Enter your comments here..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-submit" id="submitBtn"></button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openModal(action, leaveId, username, leaveType, startDate, endDate, totalDays) {
+  const modal = document.getElementById('actionModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalForm = document.getElementById('modalForm');
+  const leaveDetails = document.getElementById('leaveDetails');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  if (action === 'approve') {
+    modalTitle.textContent = 'Approve Leave Request';
+    modalForm.action = `/approve-leave/${leaveId}/`;
+    submitBtn.textContent = 'Approve Leave';
+    submitBtn.className = 'btn-submit approve';
+  } else {
+    modalTitle.textContent = 'Reject Leave Request';
+    modalForm.action = `/reject-leave/${leaveId}/`;
+    submitBtn.textContent = 'Reject Leave';
+    submitBtn.className = 'btn-submit reject';
+  }
+  
+  leaveDetails.innerHTML = `
+    <p><strong>Employee:</strong> ${username}</p>
+    <p><strong>Leave Type:</strong> ${leaveType}</p>
+    <p><strong>Period:</strong> ${startDate} to ${endDate}</p>
+    <p><strong>Total Days:</strong> ${totalDays}</p>
+  `;
+  
+  document.getElementById('comments').value = '';
+  modal.classList.add('show');
+}
+
+function closeModal() {
+  const modal = document.getElementById('actionModal');
+  modal.classList.remove('show');
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('actionModal');
+  if (event.target === modal) {
+    closeModal();
+  }
+}
+</script>
+{% endblock %}
