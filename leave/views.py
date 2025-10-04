@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login ,logout
 from django.contrib.auth.decorators import login_required
 
 def login_view(request):
@@ -35,4 +35,12 @@ def dashboard_view(request):
         return render(request, 'accounts/employee_dashboard.html')
     elif user.is_manager:
         return redirect('manager_dashboard')
+    return redirect('login')
+
+
+def logout_view(request):
+    """
+    Log out the current user and redirect to the login page.
+    """
+    logout(request)
     return redirect('login')
