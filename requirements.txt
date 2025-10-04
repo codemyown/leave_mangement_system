@@ -7,3 +7,4 @@ sqlparse>=1.0
 python-dateutil>=2.8
 django-crispy-forms>=2.1
 python-dotenv>=1.0
+psycopg[binary]>=3.0
