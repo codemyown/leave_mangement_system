@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .models import LeaveRequest, LeaveBalance , Holiday
 from datetime import timedelta
 from .helpers import get_working_days, get_active_managers
-from .decorators import employee_required
+from .decorators import employee_required , manager_required
 from .forms import LeaveRequestForm
 from django.core.mail import send_mail
 from django.conf import settings
@@ -200,3 +200,35 @@ def download_leave_history_pdf(request):
     response['Content-Disposition'] = f'attachment; filename="{request.user.username}_leave_history.pdf"'
     pdf.output(dest='F', name=response)
     return response
+
+
+# Additional views for manager functionalities can be added here.
+
+@login_required
+@manager_required
+def manager_dashboard_view(request):
+    """
+    Manager Dashboard View
+
+    Displays pending leave requests that the logged-in manager can approve. 
+    Includes leaves where the manager is either the direct approver or has delegated approval authority.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: Renders 'manager_leave_requests.html' with a list of approvable pending leaves.
+    """
+    today = date.today()
+    
+    # Get leaves where user is direct manager OR has delegation
+    pending_leaves = LeaveRequest.objects.filter(status='Pending')
+    
+    # Filter leaves current manager can approve
+    approvable_leaves = []
+    for leave in pending_leaves:
+        active_managers = get_active_managers(leave.start_date)
+        if request.user in active_managers:
+            approvable_leaves.append(leave)
+    
+    return render(request, 'accounts/manager_leave_requests.html', {'pending_leaves': approvable_leaves})
