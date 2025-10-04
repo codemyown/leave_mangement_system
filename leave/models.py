@@ -15,3 +15,19 @@ class User(AbstractUser):
     department = models.CharField(max_length=100, blank=True, null=True)
 
 
+
+class LeaveType(models.Model):
+    """
+    Model representing types of leaves.
+
+    Attributes:
+        name (str): Name of the leave type.
+        annual_quota (int): Number of leave days allocated per year (default 12).
+        carry_forward_allowed (bool): Whether unused leaves can be carried forward.
+    """
+    name = models.CharField(max_length=50)
+    annual_quota = models.IntegerField(default=12)
+    carry_forward_allowed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
