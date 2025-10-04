@@ -232,3 +232,57 @@ def manager_dashboard_view(request):
             approvable_leaves.append(leave)
     
     return render(request, 'accounts/manager_leave_requests.html', {'pending_leaves': approvable_leaves})
+
+@login_required
+@manager_required
+def approve_leave_view(request, leave_id):
+    """
+    Handle approval of a leave request by a manager.
+
+    - Checks if the current user is authorized (direct or delegated manager).
+    - Updates leave status to 'Approved' and saves manager comments.
+    - Deducts the leave days from the user's leave balance.
+    - Sends an email notification to the employee.
+    - Displays success or error messages and redirects appropriately.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        leave_id (int): ID of the leave request to approve.
+
+    Returns:
+        HttpResponse: Renders approval modal for GET or redirects to manager dashboard after POST.
+    """
+    leave = LeaveRequest.objects.get(id=leave_id)
+    
+    # UPDATED: Check if current manager can approve (direct or delegated)
+    active_managers = get_active_managers(leave.start_date)
+    if request.user not in active_managers:
+        messages.error(request, 'You are not authorized to approve this leave.')
+        return redirect('manager_dashboard')
+    
+    if request.method == 'POST':
+        comments = request.POST.get('comments', '')
+        leave.status = 'Approved'
+        leave.approver = request.user
+        leave.comments = comments
+        leave.save()
+
+        # Deduct working days from balance
+        working_days = get_working_days(leave.start_date, leave.end_date)
+        total_days = len(working_days)
+        balance = LeaveBalance.objects.get(user=leave.user, leave_type=leave.leave_type)
+        balance.balance -= total_days
+        balance.save()
+
+        # Send email
+        send_mail(
+            subject=f"Your Leave Request Approved",
+            message=f"Your leave from {leave.start_date} to {leave.end_date} ({total_days} working days) has been approved by {request.user.username}.\nComments: {comments}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[leave.user.email],
+        )
+
+        messages.success(request, f'Leave approved ({total_days} working days).')
+        return redirect('manager_dashboard')
+    
+    return render(request, 'accounts/approve_leave_modal.html', {'leave': leave})
