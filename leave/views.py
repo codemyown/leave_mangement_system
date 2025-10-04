@@ -334,3 +334,66 @@ def reject_leave_view(request, leave_id):
         return redirect('manager_dashboard')
     
     return render(request, 'accounts/reject_leave_modal.html', {'leave': leave})
+
+
+@login_required
+@manager_required
+def reports_view(request):
+    """
+    Display leave reports for managers.
+
+    - Lists all approved leaves with details.
+    - Prepares a 30-day calendar mapping upcoming approved leaves to dates.
+    - Fetches upcoming holidays with their names.
+    - Aggregates department-wise total leaves taken.
+    
+    Context passed to template:
+        all_approved_leaves: QuerySet of all approved LeaveRequest objects.
+        calendar_map: Dict mapping dates to usernames on leave.
+        month_days: List of the next 30 days.
+        holiday_dates: Dict mapping holiday dates to their names.
+        dept_leave_data: Department-wise leave counts.
+    """
+    today = date.today()
+    
+    # Get all approved leaves with full details
+    all_approved_leaves = LeaveRequest.objects.filter(
+        status='Approved'
+    ).select_related('user', 'leave_type', 'approver').order_by('-start_date')
+    
+    # Upcoming leaves for calendar
+    upcoming_leaves = LeaveRequest.objects.filter(
+        status='Approved',
+        start_date__lte=today + timedelta(days=30),
+        end_date__gte=today
+    ).order_by('start_date')
+
+    calendar_map = {}
+    for leave in upcoming_leaves:
+        current = leave.start_date
+        while current <= leave.end_date:
+            if current not in calendar_map:
+                calendar_map[current] = []
+            calendar_map[current].append(leave.user.username)
+            current += timedelta(days=1)
+
+    # Get holidays with names
+    holidays = Holiday.objects.filter(
+        date__range=[today, today + timedelta(days=30)]
+    )
+    holiday_dates = {h.date: h.name for h in holidays}
+
+    # Department-wise total leaves taken
+    dept_leave_data = LeaveRequest.objects.filter(status='Approved') \
+        .values('user__department', 'leave_type__name') \
+        .annotate(total=Count('id')) \
+        .order_by('user__department')
+
+    context = {
+        'all_approved_leaves': all_approved_leaves,
+        'calendar_map': calendar_map,
+        'month_days': [today + timedelta(days=i) for i in range(30)],
+        'holiday_dates': holiday_dates,
+        'dept_leave_data': dept_leave_data
+    }
+    return render(request, 'accounts/reports.html', context)
