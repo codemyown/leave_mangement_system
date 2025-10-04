@@ -15,4 +15,5 @@ urlpatterns = [
 
    # Manager-specific views can be added here
    path('manager-dashboard/', views.manager_dashboard_view, name='manager_dashboard'),
+   path('approve-leave/<int:leave_id>/', views.approve_leave_view, name='approve_leave'),
 ]
