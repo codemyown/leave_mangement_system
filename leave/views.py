@@ -109,3 +109,17 @@ def apply_leave_view(request):
     else:
         form = LeaveRequestForm()
     return render(request, 'accounts/apply_leave.html', {'form': form})
+
+@login_required
+@employee_required
+def leave_history_view(request):
+    """
+    Display the logged-in employee's leave history and current leave balances.
+
+    - Fetches all leave requests of the user ordered by start date (latest first).
+    - Retrieves the user's leave balances.
+    - Passes today's date for reference in the template.
+    """
+    leaves = LeaveRequest.objects.filter(user=request.user).order_by('-start_date')
+    balances = LeaveBalance.objects.filter(user=request.user)
+    return render(request, 'accounts/leave_history.html', {'leaves': leaves, 'balances': balances, 'today': date.today()})
