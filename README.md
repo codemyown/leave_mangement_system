@@ -5,6 +5,12 @@ Easily deployable using **Docker** and **PostgreSQL**.
 
 ---
 
+## 📄 Documentation
+You can find the full documentation here:  
+[Documentation Link](https://docs.google.com/document/d/1dbK6j4la8X8xJqllgmXhdoOXUBzzhwM5/edit?usp=sharing&ouid=118273656391334814297&rtpof=true&sd=true)
+
+---
+
 ## 🎥 Demo Video
 Watch this video to see the full functionality of the app:  
 [Watch Demo](https://drive.google.com/file/d/1X4J3DLt6hN_vs2CtUVjb1_vPZNf_z-q7/view?usp=sharing)
