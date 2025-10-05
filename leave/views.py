@@ -105,12 +105,13 @@ def apply_leave_view(request):
 
             active_managers = get_active_managers(start_date)
             for manager in active_managers:
-                send_mail(
-                    subject=f"New Leave Request from {request.user.username}",
-                    message=f"{request.user.username} applied for {leave_type.name} from {start_date} to {end_date} ({total_working_days} working days).",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[manager.email],
-                )
+                print("Send mail to................. ",manager.email)
+                # send_mail(
+                #     subject=f"New Leave Request from {request.user.username}",
+                #     message=f"{request.user.username} applied for {leave_type.name} from {start_date} to {end_date} ({total_working_days} working days).",
+                #     from_email=settings.DEFAULT_FROM_EMAIL,
+                #     recipient_list=[manager.email],
+                # )
 
             messages.success(request, f'Leave request submitted ({total_working_days} working days).')
             return redirect('apply_leave')
@@ -256,12 +257,13 @@ def cancel_leave_view(request, leave_id):
         # UPDATED: Notify active managers (considering delegation)
         active_managers = get_active_managers()
         for manager in active_managers:
-            send_mail(
-                subject=f"Leave Cancelled by {request.user.username}",
-                message=f"{request.user.username} cancelled their {leave.leave_type.name} leave from {leave.start_date} to {leave.end_date}.\nReason: {reason}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[manager.email],
-            )
+            print("Cancel mail to................. ",manager.email)
+            # send_mail(
+            #     subject=f"Leave Cancelled by {request.user.username}",
+            #     message=f"{request.user.username} cancelled their {leave.leave_type.name} leave from {leave.start_date} to {leave.end_date}.\nReason: {reason}",
+            #     from_email=settings.DEFAULT_FROM_EMAIL,
+            #     recipient_list=[manager.email],
+            # )
         
         messages.success(request, 'Leave request cancelled successfully.')
         return redirect('leave_history')
@@ -343,12 +345,13 @@ def approve_leave_view(request, leave_id):
         balance.save()
 
         # Send email
-        send_mail(
-            subject=f"Your Leave Request Approved",
-            message=f"Your leave from {leave.start_date} to {leave.end_date} ({total_days} working days) has been approved by {request.user.username}.\nComments: {comments}",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[leave.user.email],
-        )
+        print("Approved mail to................. ",leave.user.email)
+        # send_mail(
+        #     subject=f"Your Leave Request Approved",
+        #     message=f"Your leave from {leave.start_date} to {leave.end_date} ({total_days} working days) has been approved by {request.user.username}.\nComments: {comments}",
+        #     from_email=settings.DEFAULT_FROM_EMAIL,
+        #     recipient_list=[leave.user.email],
+        # )
 
         messages.success(request, f'Leave approved ({total_days} working days).')
         return redirect('manager_dashboard')
@@ -391,12 +394,13 @@ def reject_leave_view(request, leave_id):
         leave.save()
 
         # Send email
-        send_mail(
-            subject=f"Your Leave Request Rejected",
-            message=f"Your leave from {leave.start_date} to {leave.end_date} has been rejected by {request.user.username}.\nReason: {comments}",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[leave.user.email],
-        )
+        print("Rejected mail to................. ",leave.user.email)
+        # send_mail(
+        #     subject=f"Your Leave Request Rejected",
+        #     message=f"Your leave from {leave.start_date} to {leave.end_date} has been rejected by {request.user.username}.\nReason: {comments}",
+        #     from_email=settings.DEFAULT_FROM_EMAIL,
+        #     recipient_list=[leave.user.email],
+        # )
 
         messages.error(request, f'Leave request by {leave.user.username} rejected.')
         return redirect('manager_dashboard')
