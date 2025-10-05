@@ -68,7 +68,9 @@ def apply_leave_view(request):
 
     - Validates leave request form on POST.
     - Checks leave balance for the selected leave type.
-    - Prevents overlapping approved leaves.
+    - Prevents overlapping approved or pending leaves.
+    - Warns about holidays in period (not counted as leave days).
+    - Blocks leave if includes Sundays.
     - Saves leave request with 'Pending' status.
     - Sends email notifications to active managers considering delegation.
     - Displays leave application form on GET request.
@@ -83,11 +85,20 @@ def apply_leave_view(request):
             working_days = get_working_days(start_date, end_date)
             total_working_days = len(working_days)
 
+            # Check for Sundays in period
+            from datetime import timedelta
+            all_days = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+            sundays_in_period = [day for day in all_days if day.weekday() == 6]
+            if sundays_in_period:
+                messages.error(request, f"Cannot apply leave on Sundays: {', '.join(str(s) for s in sundays_in_period)}.")
+                return redirect('apply_leave')
+
             balance_obj = LeaveBalance.objects.filter(user=request.user, leave_type=leave_type).first()
             if not balance_obj or balance_obj.balance < total_working_days:
                 messages.error(request, f'Insufficient leave balance (working days: {total_working_days}).')
                 return redirect('apply_leave')
 
+            # Check overlapping approved leaves
             overlapping = LeaveRequest.objects.filter(
                 user=request.user,
                 status='Approved',
@@ -97,6 +108,22 @@ def apply_leave_view(request):
             if overlapping.exists():
                 messages.error(request, "You already have approved leave during this period.")
                 return redirect('apply_leave')
+
+            # Check overlapping pending leaves
+            pending_overlapping = LeaveRequest.objects.filter(
+                user=request.user,
+                status='Pending',
+                start_date__lte=end_date,
+                end_date__gte=start_date
+            )
+            if pending_overlapping.exists():
+                messages.error(request, "You have a pending leave during this period.")
+                return redirect('apply_leave')
+
+            # Holiday warning
+            holidays_in_period = Holiday.objects.filter(date__range=[start_date, end_date]).count()
+            if holidays_in_period > 0:
+                messages.warning(request, f"Note: {holidays_in_period} holidays in your leave period (not counted as leave days).")
 
             leave = form.save(commit=False)
             leave.user = request.user
@@ -118,7 +145,6 @@ def apply_leave_view(request):
     else:
         form = LeaveRequestForm()
     return render(request, 'accounts/apply_leave.html', {'form': form})
-
 @login_required
 @employee_required
 def leave_history_view(request):

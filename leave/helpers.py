@@ -4,20 +4,12 @@ from .models import Holiday, User, Delegation
 
 def get_working_days(start_date, end_date):
     """
-    Calculate working days between start_date and end_date, excluding holidays.
-
-    Args:
-        start_date (date): Start of the period.
-        end_date (date): End of the period.
-
-    Returns:
-        List[date]: List of working days excluding holidays.
+    Calculate working days between start_date and end_date, excluding holidays and Sundays.
     """
     all_days = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
     holidays = set(h.date for h in Holiday.objects.filter(date__range=[start_date, end_date]))
-    working_days = [day for day in all_days if day not in holidays]
+    working_days = [day for day in all_days if day not in holidays and day.weekday() != 6]  # 6 = Sunday
     return working_days
-
 
 def get_active_managers(target_date=None):
     """
