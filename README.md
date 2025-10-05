@@ -38,7 +38,6 @@ POSTGRES_DB=mydb123
 POSTGRES_USER=bhanu123
 POSTGRES_PASSWORD=bhanu
 ```
-
 > ⚙️ You can modify these values as needed.
 
 4. **Build and Run Containers**
@@ -101,6 +100,14 @@ pip install -r requirements.txt
 4. **Setup PostgreSQL**
 - Install PostgreSQL on your system
 - Create a database and user matching `.env` file
+Create a `.env` file in the project root:
+```bash
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=mydb123
+POSTGRES_USER=bhanu123
+POSTGRES_PASSWORD=bhanu
+```
 
 5. **Run Migrations**
 ```bash
@@ -111,7 +118,6 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
-
 - Open your browser at: **http://localhost:8000**
 
 ---
