@@ -1,53 +1,59 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from leave.models import LeaveType, LeaveBalance, Holiday, Delegation
-from datetime import date, timedelta
+from leave.models import User, LeaveType, LeaveBalance, Holiday, LeaveRequest, Delegation
+from datetime import date
 
-User = get_user_model()
+class Command(BaseCommand):
+    help = 'Populate sample test data for leave management'
 
-class Command(BaseCommand):  # <-- MUST be named Command
-    help = 'Seed the database with test data'
+    def handle(self, *args, **options):
+        User = get_user_model()
 
-    def handle(self, *args, **kwargs):
-        self.stdout.write("Seeding database...")
+        # Create Leave Types
+        LeaveType.objects.get_or_create(name='Annual Leave', defaults={'annual_quota': 12, 'carry_forward_allowed': True})
+        LeaveType.objects.get_or_create(name='Sick Leave', defaults={'annual_quota': 10, 'carry_forward_allowed': False})
+        self.stdout.write(self.style.SUCCESS('Leave types created'))
 
-        # --- Users ---
-        if not User.objects.filter(username='manager').exists():
-            User.objects.create_user(username='manager', password='manager', is_manager=True, department='HR')
-        if not User.objects.filter(username='emp').exists():
-            User.objects.create_user(username='emp1', password='emp123', is_employee=True, department='HR')
-        if not User.objects.filter(username='emp').exists():
-            User.objects.create_user(username='emp', password='emp', is_employee=True, department='IT')
+        # Create Users
+        ajay, _ = User.objects.get_or_create(username='ajay', defaults={'email': 'ajay@example.com', 'is_employee': True, 'department': 'IT'})
+        ajay.set_password('ajay')
+        ajay.save()
 
-        self.stdout.write("Users created.")
+        vijay, _ = User.objects.get_or_create(username='vijay', defaults={'email': 'vijay@example.com', 'is_manager': True, 'department': 'HR'})
+        vijay.set_password('vijay')
+        vijay.save()
 
-        # --- Leave Types ---
-        sick = LeaveType.objects.get_or_create(name='Sick', annual_quota=12, carry_forward_allowed=True)[0]
-        casual = LeaveType.objects.get_or_create(name='Casual', annual_quota=10, carry_forward_allowed=False)[0]
-        earned = LeaveType.objects.get_or_create(name='Earned', annual_quota=15, carry_forward_allowed=True)[0]
+        admin, _ = User.objects.get_or_create(username='admin', defaults={'email': 'admin@example.com', 'is_staff': True, 'is_superuser': True, 'department': 'Admin'})
+        admin.set_password('admin')
+        admin.is_superuser = True  # Ensure superuser
+        admin.save()
+        self.stdout.write(self.style.SUCCESS('Users created: ajay/ajay (employee), vijay/vijay (manager), admin/admin (superuser)'))
 
-        self.stdout.write("Leave types created.")
+        # Create Balances for ajay
+        lt_annual = LeaveType.objects.get(name='Annual Leave')
+        lt_sick = LeaveType.objects.get(name='Sick Leave')
+        LeaveBalance.objects.get_or_create(user=ajay, leave_type=lt_annual, defaults={'balance': 12})
+        LeaveBalance.objects.get_or_create(user=ajay, leave_type=lt_sick, defaults={'balance': 10})
+        self.stdout.write(self.style.SUCCESS('Balances created for ajay'))
 
-        # --- Leave Balances ---
-        for user in User.objects.filter(is_employee=True):
-            for leave_type in [sick, casual, earned]:
-                LeaveBalance.objects.get_or_create(user=user, leave_type=leave_type, balance=leave_type.annual_quota)
+        # Create Holidays
+        Holiday.objects.get_or_create(date=date(2025, 10, 20), defaults={'name': 'Diwali'})
+        Holiday.objects.get_or_create(date=date(2025, 12, 25), defaults={'name': 'Christmas'})
+        Holiday.objects.get_or_create(date=date(2026, 1, 1), defaults={'name': 'New Year'})
+        self.stdout.write(self.style.SUCCESS('Holidays created'))
 
-        self.stdout.write("Leave balances created.")
+        # Create Leave Request for ajay
+        LeaveRequest.objects.get_or_create(
+            user=ajay, leave_type=lt_annual, start_date=date(2025, 11, 1),
+            end_date=date(2025, 11, 5), defaults={'reason': 'Vacation', 'status': 'Pending'}
+        )
+        self.stdout.write(self.style.SUCCESS('Leave request created for ajay'))
 
-        # --- Holidays ---
-        for i in range(3):
-            hol_date = date.today() + timedelta(days=i+1)
-            Holiday.objects.get_or_create(date=hol_date, name=f"Holiday {i+1}")
+        # Create Delegation
+        Delegation.objects.get_or_create(
+            manager=vijay, delegate=ajay, start_date=date(2025, 10, 1),
+            end_date=date(2025, 10, 31)
+        )
+        self.stdout.write(self.style.SUCCESS('Delegation created: vijay to ajay'))
 
-        self.stdout.write("Holidays created.")
-
-        # --- Delegation ---
-        manager = User.objects.get(username='manager1')
-        delegate = User.objects.get(username='emp1')
-        Delegation.objects.get_or_create(manager=manager, delegate=delegate,
-                                       start_date=date.today(),
-                                       end_date=date.today() + timedelta(days=7))
-
-        self.stdout.write("Delegation created.")
-        self.stdout.write(self.style.SUCCESS("Database seeded successfully!"))
+        self.stdout.write(self.style.SUCCESS('All sample data added!'))
