@@ -93,4 +93,4 @@ docker-compose up --build
 
 ---
 
-**Developed by:** *MR Softwares*
+**Developed by:** *Ajay Pawar*
