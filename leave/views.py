@@ -13,7 +13,7 @@ from datetime import date
 from fpdf import FPDF
 from django.http import HttpResponse
 from django.db.models import Count
-
+from io import BytesIO
 
 def login_view(request):
     """
@@ -186,19 +186,10 @@ def holiday_calendar_view(request):
     }
     return render(request, 'accounts/holiday_calendar.html', context)
 
+
 @login_required
 @employee_required
 def download_leave_history_pdf(request):
-    """
-    Generate and download a PDF of the logged-in employee's leave history.
-
-    Includes:
-    - Leave balances for each leave type.
-    - Detailed leave requests with start/end dates, type, status, approver, and reason.
-
-    Returns:
-        HttpResponse: PDF file as attachment.
-    """
     leaves = LeaveRequest.objects.filter(user=request.user).order_by('-start_date')
     balances = LeaveBalance.objects.filter(user=request.user)
 
@@ -208,7 +199,6 @@ def download_leave_history_pdf(request):
     pdf.cell(0, 10, f"{request.user.username} - Leave History", ln=True, align="C")
     pdf.ln(10)
 
-    # Leave Balances
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(0, 10, "Leave Balances:", ln=True)
     pdf.set_font("Arial", '', 12)
@@ -216,7 +206,6 @@ def download_leave_history_pdf(request):
         pdf.cell(0, 8, f"{bal.leave_type.name}: {bal.balance} days", ln=True)
     pdf.ln(5)
 
-    # Leave Requests
     pdf.set_font("Arial", 'B', 12)
     pdf.cell(0, 10, "Leave History:", ln=True)
     pdf.set_font("Arial", '', 12)
@@ -226,13 +215,14 @@ def download_leave_history_pdf(request):
         pdf.multi_cell(0, 8, f"Reason: {leave.reason}")
         pdf.ln(2)
 
-    # Output PDF to HttpResponse
-    response = HttpResponse(content_type='application/pdf')
+    # Write PDF to memory
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+
+    response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{request.user.username}_leave_history.pdf"'
-    pdf.output(dest='F', name=response)
     return response
-
-
 
 @login_required
 @employee_required
