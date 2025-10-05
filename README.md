@@ -49,11 +49,29 @@ If already built:
 docker-compose up -d
 ```
 
-5. **Access the Application**
+5. **Seed Initial Data**
+```bash
+# Enter container
+docker exec -it leave-web-1 bash
+
+# Run seed command
+python manage.py seed_db
+```
+
+6. **Run Tests (Docker)**
+```bash
+# Enter container
+docker exec -it leave-web-1 bash
+
+# Run tests
+python manage.py test
+```
+
+7. **Access the Application**
 Open your browser:  
 👉 **http://localhost:8000**
 
-6. **Useful Docker Commands**
+8. **Useful Docker Commands**
 ```bash
 # Stop containers
 docker-compose down
@@ -119,6 +137,17 @@ python manage.py migrate
 python manage.py runserver
 ```
 - Open your browser at: **http://localhost:8000**
+
+7. **Seed Initial Data**
+```bash
+# After running the server
+python manage.py seed_db
+```
+
+8. **Run Tests (Local)**
+```bash
+python manage.py test
+```
 
 ---
 
