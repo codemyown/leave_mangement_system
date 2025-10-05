@@ -5,6 +5,12 @@ Easily deployable using **Docker** and **PostgreSQL**.
 
 ---
 
+## 📄 Documentation
+You can find the full documentation here:  
+[Documentation Link](https://docs.google.com/document/d/1dbK6j4la8X8xJqllgmXhdoOXUBzzhwM5/edit?usp=sharing&ouid=118273656391334814297&rtpof=true&sd=true)
+
+---
+
 ## 🎥 Demo Video
 Watch this video to see the full functionality of the app:  
 [Watch Demo](https://drive.google.com/file/d/1X4J3DLt6hN_vs2CtUVjb1_vPZNf_z-q7/view?usp=sharing)
@@ -49,11 +55,34 @@ If already built:
 docker-compose up -d
 ```
 
-5. **Access the Application**
+5. **Seed Initial Data**
+```bash
+# Enter container
+docker exec -it leave-web-1 bash
+
+# Run seed command
+python manage.py seed_db
+```
+
+6. **Default Login Credentials (After Seeding Data)**
+- **Employee:** username: `ajay`, password: `ajay`
+- **Manager:** username: `vijay`, password: `vijay`
+- **Admin Panel:** username: `admin`, password: `admin`
+
+7. **Run Tests (Docker)**
+```bash
+# Enter container
+docker exec -it leave-web-1 bash
+
+# Run tests
+python manage.py test
+```
+
+8. **Access the Application**
 Open your browser:  
 👉 **http://localhost:8000**
 
-6. **Useful Docker Commands**
+9. **Useful Docker Commands**
 ```bash
 # Stop containers
 docker-compose down
@@ -119,6 +148,22 @@ python manage.py migrate
 python manage.py runserver
 ```
 - Open your browser at: **http://localhost:8000**
+
+7. **Seed Initial Data**
+```bash
+# After running the server
+python manage.py seed_db
+```
+
+8. **Default Login Credentials (After Seeding Data)**
+- **Employee:** username: `ajay`, password: `ajay`
+- **Manager:** username: `vijay`, password: `vijay`
+- **Admin Panel:** username: `admin`, password: `admin`
+
+9. **Run Tests (Local)**
+```bash
+python manage.py test
+```
 
 ---
 
