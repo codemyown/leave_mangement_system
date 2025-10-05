@@ -58,7 +58,12 @@ docker exec -it leave-web-1 bash
 python manage.py seed_db
 ```
 
-6. **Run Tests (Docker)**
+6. **Default Login Credentials (After Seeding Data)**
+- **Employee:** username: `ajay`, password: `ajay`
+- **Manager:** username: `vijay`, password: `vijay`
+- **Admin Panel:** username: `admin`, password: `admin`
+
+7. **Run Tests (Docker)**
 ```bash
 # Enter container
 docker exec -it leave-web-1 bash
@@ -67,11 +72,11 @@ docker exec -it leave-web-1 bash
 python manage.py test
 ```
 
-7. **Access the Application**
+8. **Access the Application**
 Open your browser:  
 👉 **http://localhost:8000**
 
-8. **Useful Docker Commands**
+9. **Useful Docker Commands**
 ```bash
 # Stop containers
 docker-compose down
@@ -144,7 +149,12 @@ python manage.py runserver
 python manage.py seed_db
 ```
 
-8. **Run Tests (Local)**
+8. **Default Login Credentials (After Seeding Data)**
+- **Employee:** username: `ajay`, password: `ajay`
+- **Manager:** username: `vijay`, password: `vijay`
+- **Admin Panel:** username: `admin`, password: `admin`
+
+9. **Run Tests (Local)**
 ```bash
 python manage.py test
 ```
