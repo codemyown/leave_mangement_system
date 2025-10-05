@@ -3,6 +3,11 @@
 A Python Django-based Leave Management System for handling employee leave requests, approvals, and balance tracking.  
 Easily deployable using **Docker** and **PostgreSQL**.
 
+
+## 🎥 Demo Video
+Watch this video to see the full functionality of the app:  
+[Watch Demo](https://drive.google.com/file/d/1X4J3DLt6hN_vs2CtUVjb1_vPZNf_z-q7/view?usp=sharing)
+
 ---
 
 ## 🚀 Setup Instructions (Docker)
