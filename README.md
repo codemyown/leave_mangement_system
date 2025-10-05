@@ -7,6 +7,9 @@ Easily deployable using **Docker** and **PostgreSQL**.
 
 ## 🚀 Setup Instructions (Docker)
 
+For a fast walkthrough of the Docker setup, watch the video here:  
+[Watch Video](https://drive.google.com/file/d/10zGOMXtCFnwT6nztZEtD9AWD_-nAfazx/view?usp=sharing)
+
 ### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/codemyown/leave_mangement_system.git
